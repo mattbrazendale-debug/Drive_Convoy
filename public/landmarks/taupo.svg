@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-label="Waitomo hills">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e3a5f"/><stop offset="100%" stop-color="#0b1018"/></linearGradient></defs>
+  <rect width="800" height="400" fill="url(#g)"/>
+  <ellipse cx="400" cy="320" rx="360" ry="80" fill="#16324a"/>
+  <circle cx="200" cy="120" r="40" fill="#7dd3fc" opacity=".35"/>
+</svg>

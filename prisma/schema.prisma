@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Teacher {
+  id              String   @id
+  schoolId        String
+  displayName     String
+  explainerSeenAt DateTime?
+  createdAt       DateTime @default(now())
+  classes         ClassGroup[]
+}
+
+model ClassGroup {
+  id            String   @id
+  schoolId      String
+  name          String
+  yearLevel     Int?
+  tripId        String
+  dispatchView  String   @default("list")
+  archivedAt    DateTime?
+  createdAt     DateTime @default(now())
+  teacherId     String
+  teacher       Teacher  @relation(fields: [teacherId], references: [id])
+  roster        RosterEntry[]
+  sessions      Session[]
+  seatingPlan   SeatingPlan?
+}
+
+model RosterEntry {
+  id            String   @id
+  classId       String
+  class         ClassGroup @relation(fields: [classId], references: [id])
+  givenName     String
+  familyInitial String?
+  displayName   String
+  source        String   @default("paste")
+  active        Boolean  @default(true)
+  seatRow       Int?
+  seatCol       Int?
+  createdAt     DateTime @default(now())
+  claims        SessionClaim[]
+  answers       AnswerEvent[]
+}
+
+model SeatingPlan {
+  classId       String   @id
+  class         ClassGroup @relation(fields: [classId], references: [id])
+  layout        String
+  rows          Int
+  cols          Int
+  frontOfRoom   String
+  seatsJson     String
+  updatedAt     DateTime @updatedAt
+}
+
+model Session {
+  id                    String   @id
+  classId               String
+  class                 ClassGroup @relation(fields: [classId], references: [id])
+  legId                 String
+  joinCode              String   @unique
+  status                String
+  launchedAt            DateTime @default(now())
+  startedAt             DateTime?
+  endedAt               DateTime?
+  fuelCurrent           Float    @default(0)
+  fuelTarget            Float    @default(0)
+  resumedFromSessionId  String?
+  flagsJson             String   @default("{}")
+  claims                SessionClaim[]
+  answers               AnswerEvent[]
+  tows                  Tow[]
+}
+
+model SessionClaim {
+  id          String   @id
+  sessionId   String
+  session     Session  @relation(fields: [sessionId], references: [id])
+  studentId   String
+  student     RosterEntry @relation(fields: [studentId], references: [id])
+  deviceId    String
+  claimedAt   DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  connection  String   @default("online")
+  questionIndex Int    @default(0)
+  conflictPending Boolean @default(false)
+
+  @@unique([sessionId, studentId])
+}
+
+model AnswerEvent {
+  id            String   @id
+  sessionId     String
+  session       Session  @relation(fields: [sessionId], references: [id])
+  studentId     String
+  student       RosterEntry @relation(fields: [studentId], references: [id])
+  questionId    String
+  legId         String
+  correct       Boolean
+  topicKey      String
+  answeredAt    DateTime
+  clientAnswerId String  @unique
+}
+
+model Tow {
+  id          String   @id
+  sessionId   String
+  session     Session  @relation(fields: [sessionId], references: [id])
+  type        String
+  studentId   String?
+  peerId      String?
+  hintText    String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  deliveredAt DateTime?
+}
